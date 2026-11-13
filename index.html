@@ -1,6 +1,10 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nomi delle strade OSM</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Percorso e controllo per scrivere i nomi delle strade in OpenStreetMap secondo la wiki italiana e le regole Istat, con l'etimologia da Wikidata.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -41,7 +45,7 @@
   --warn: #f0be5a; --warn-soft: #36290f; --tag-bg: #212b38; color-scheme: dark;
 }
 * { box-sizing: border-box }
-body { background: var(--bg); color: var(--ink); font: 16px/1.55 var(--f-body); }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--f-body); }
 .wrap {
   max-width: 1120px; margin: 0 auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -200,6 +204,8 @@ footer { color: var(--muted); font-size: 0.88rem; display: grid; gap: 6px; max-w
   @keyframes flash { from { box-shadow: 0 0 0 4px var(--sign) } to { box-shadow: 0 0 0 0 transparent } }
 }
 </style>
+</head>
+<body>
 
 <div class="wrap">
 
@@ -919,12 +925,13 @@ footer { color: var(--muted); font-size: 0.88rem; display: grid; gap: 6px; max-w
   }
 
   /* ---- Ricerca su Wikidata (SPARQL) ----
-     La pagina non può contattare altri siti: le query passano dal browser integrato
-     dell'app desktop di Claude (server host:claude_browser). Regole per non pesare
-     sul servizio: solo su clic, una query alla volta, almeno 5 s tra due query,
-     risultati in cache per 7 giorni. */
-  var WD_GAP = 5000, WD_TTL = 7 * 24 * 3600 * 1000, wdLast = 0, wdBusy = false, wdTab = null, wdMem = {};
-  var mcpP = (window.claude && window.claude.use) ? window.claude.use('mcp').catch(function () { return null; }) : Promise.resolve(null);
+     La pagina interroga direttamente query.wikidata.org (che accetta richieste
+     da altri siti). Regole per non pesare sul servizio: si parte solo quando
+     smetti di scrivere, una query alla volta, almeno 5 s tra due query, si
+     rispetta Retry-After se il servizio chiede di rallentare, risultati in
+     cache per 7 giorni. */
+  var WD_GAP = 5000, WD_TTL = 7 * 24 * 3600 * 1000, WD_TIMEOUT = 20000, wdLast = 0, wdBusy = false, wdMem = {};
+  var WD_URL = 'https://query.wikidata.org/sparql';
   function saintless(t) { return t.replace(/^(San|Santo|Santa|Beato|Beata)\s+/i, '').replace(/^Sant['’]/i, ''); }
   function sparqlFor(term) {
     var lit = term.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
@@ -941,13 +948,8 @@ footer { color: var(--muted); font-size: 0.88rem; display: grid; gap: 6px; max-w
       '  SERVICE wikibase:label { bd:serviceParam wikibase:language "it,en" . }\n' +
       '} ORDER BY ?ord LIMIT 8';
   }
-  function textOf(res) {
-    return ((res && res.content) || []).map(function (b) { return b.type === 'text' ? b.text : ''; }).join('\n');
-  }
-  function parseCands(pageText) {
-    var a = pageText.indexOf('{'), b = pageText.lastIndexOf('}');
-    if (a < 0 || b < a) throw { code: 'bad_answer' };
-    var data = JSON.parse(pageText.slice(a, b + 1));
+  function parseCands(data) {
+    if (!data || !data.results) throw { code: 'bad_answer' };
     var seen = {}, out = [];
     ((data.results && data.results.bindings) || []).forEach(function (row) {
       var q = (row.item.value.match(/Q\d+$/) || [])[0];
@@ -974,40 +976,37 @@ footer { color: var(--muted); font-size: 0.88rem; display: grid; gap: 6px; max-w
     if (wdBusy) return Promise.reject({ code: 'busy' });
     var wait = WD_GAP - (Date.now() - wdLast);
     if (wait > 0) return Promise.reject({ code: 'too_soon', wait: wait });
+    if (typeof fetch !== 'function') return Promise.reject({ code: 'network' });
     wdBusy = true; wdLast = Date.now();
-    var url = 'https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(sparqlFor(term));
-    var B = 'host:claude_browser', mcp;
-    return mcpP.then(function (m) {
-      if (!m) throw { code: 'no_host' };
-      mcp = m;
-      var open = function () {
-        return mcp.callTool(B, 'preview_start', { url: url }, { cache: false }).then(function (r) {
-          var t = textOf(r).match(/"tabId"\s*:\s*"([^"]+)"/);
-          wdTab = t ? t[1] : null;
-        });
-      };
-      if (!wdTab) return open();
-      return mcp.callTool(B, 'navigate', { url: url, tabId: wdTab }, { cache: false })
-        .catch(function (e) { if (e && e.code === 'tool_error') { wdTab = null; return open(); } throw e; });
-    }).then(function () {
-      var args = { max_chars: 50000 };
-      if (wdTab) args.tabId = wdTab;
-      return mcp.callTool(B, 'get_page_text', args, { cache: false });
-    }).then(function (r) {
-      var cands = parseCands(textOf(r));
-      cachePut(term, cands);
-      return cands;
-    }).then(function (c) { wdBusy = false; return c; }, function (e) { wdBusy = false; throw e; });
+    var url = WD_URL + '?format=json&query=' + encodeURIComponent(sparqlFor(term));
+    var ctl = typeof AbortController === 'function' ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function () { ctl.abort(); }, WD_TIMEOUT) : null;
+    return fetch(url, { headers: { Accept: 'application/sparql-results+json', 'Api-User-Agent': 'osm-names/1.0 (https://github.com/giopera/osm-names)' }, signal: ctl ? ctl.signal : undefined, credentials: 'omit' })
+      .then(function (res) {
+        if (res.status === 429 || res.status === 503) {
+          var ra = parseInt(res.headers.get('Retry-After'), 10);
+          var pause = (isFinite(ra) && ra > 0 ? ra : 60) * 1000;
+          wdLast = Date.now() + pause - WD_GAP; /* niente nuove query fino alla fine della pausa */
+          throw { code: 'rate', wait: pause };
+        }
+        if (!res.ok) throw { code: 'http', status: res.status };
+        return res.json();
+      }, function () { throw { code: 'network' }; })
+      .then(function (data) {
+        var cands = parseCands(data);
+        cachePut(term, cands);
+        return cands;
+      })
+      .then(function (c) { clearTimeout(timer); wdBusy = false; return c; },
+            function (e) { clearTimeout(timer); wdBusy = false; throw e; });
   }
   function wdError(e) {
     var code = e && e.code;
-    if (code === 'cancelled') return 'Ricerca su Wikidata annullata.';
-    if (code === 'approval_required' || code === 'consent_required') return 'Per cercare su Wikidata serve la tua approvazione all\'uso del browser dell\'app.';
-    if (code === 'not_in_manifest') return 'La ricerca su Wikidata è disattivata nei permessi di questa pagina.';
+    if (code === 'rate') return 'Wikidata chiede di rallentare: riprova tra ' + Math.ceil(e.wait / 1000) + ' s.';
+    if (code === 'http') return 'Wikidata non ha risposto (errore ' + e.status + ').';
     if (code === 'bad_answer' || e instanceof SyntaxError) return 'Wikidata ha risposto in un formato inatteso (forse è sovraccarico).';
     return 'Ricerca su Wikidata non riuscita (' + (code || 'errore') + ').';
   }
-  var NOHOST = ['no_host', 'server_not_connected', 'not_granted', 'capability_disabled', 'capability_removed'];
 
   /* Stato dell'etimologia: sopravvive ai ridisegni fatti a ogni tasto. */
   var ety = { term: null, cands: null, sel: null, status: '', err: null, manualQ: '' };
@@ -1020,7 +1019,7 @@ footer { color: var(--muted); font-size: 0.88rem; display: grid; gap: 6px; max-w
   function tagsNow() {
     var t = curTags.slice(), lb = etyLabel();
     if (lb) t.push('name:etymology=' + lb, 'name:etymology:wikidata=' + ety.sel);
-    else if (ety.status === 'nohost' && ety.manualQ) t.push('name:etymology=' + ety.term, 'name:etymology:wikidata=' + ety.manualQ);
+    else if (ety.status === 'offline' && ety.manualQ) t.push('name:etymology=' + ety.term, 'name:etymology:wikidata=' + ety.manualQ);
     return t;
   }
   function paintTags() { var pre = document.getElementById('tags-out'); if (pre) pre.textContent = tagsNow().join('\n'); }
@@ -1047,7 +1046,7 @@ footer { color: var(--muted); font-size: 0.88rem; display: grid; gap: 6px; max-w
     ety.status = 'searching';
     wikidataPeople(term).then(function (c) { gotCands(term, c); }, function (e) {
       if (term !== ety.term) return;
-      ety.status = NOHOST.indexOf(e && e.code) >= 0 ? 'nohost' : 'error';
+      ety.status = e && e.code === 'network' ? 'offline' : 'error';
       ety.err = e; paintEty(); paintTags();
     });
   }
@@ -1095,10 +1094,10 @@ footer { color: var(--muted); font-size: 0.88rem; display: grid; gap: 6px; max-w
       var r = document.createElement('button'); r.type = 'button'; r.className = 'copy'; r.textContent = 'Riprova';
       r.addEventListener('click', function () { ety.status = ''; paintEty(); runEty(); });
       p.appendChild(r); box.appendChild(p);
-    } else if (ety.status === 'nohost') {
+    } else if (ety.status === 'offline') {
       var k2 = document.createElement('span'); k2.className = 'k'; k2.textContent = 'Chi ricorda il nome';
       var p2 = document.createElement('p'); p2.className = 'disclaimer';
-      p2.innerHTML = 'La ricerca automatica funziona solo nell\'app desktop di Claude. <a target="_blank" rel="noopener"></a> e incolla qui il codice Q, se sei sicuro che sia la persona della targa.';
+      p2.innerHTML = 'Wikidata non è raggiungibile in questo momento. <a target="_blank" rel="noopener"></a> e incolla qui il codice Q, se sei sicuro che sia la persona della targa.';
       var a = p2.querySelector('a');
       a.href = 'https://www.wikidata.org/w/index.php?uselang=it&search=' + encodeURIComponent(ety.term);
       a.textContent = 'Cerca "' + ety.term + '" su Wikidata ↗';
@@ -1158,5 +1157,5 @@ footer { color: var(--muted); font-size: 0.88rem; display: grid; gap: 6px; max-w
   render();
 })();
 </script>
-
-</body></html>
+</body>
+</html>
