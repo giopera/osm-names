@@ -1,0 +1,1162 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Nomi delle strade OSM</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: una colonna di lettura; il diagramma è una "spina" verticale di domande con i rami "Sì" a destra, come una sequenza di cartelli. */
+:root {
+  --bg: #eef1f5;
+  --surface: #ffffff;
+  --ink: #142033;
+  --muted: #566278;
+  --line: #cfd6e0;
+  --sign: #1b4c9a;
+  --sign-ink: #ffffff;
+  --sign-soft: #e3ebf7;
+  --good: #1c7342;
+  --good-soft: #e1f2e8;
+  --bad: #ac2c22;
+  --bad-soft: #f8e4e1;
+  --warn: #8a5a00;
+  --warn-soft: #fbf0d9;
+  --tag-bg: #e8ecf2;
+  --f-display: "Titillium Web", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e131a; --surface: #161d27; --ink: #e5eaf2; --muted: #9ba7b9; --line: #2b3646;
+    --sign: #3d76d4; --sign-ink: #ffffff; --sign-soft: #1a2a42;
+    --good: #5cc488; --good-soft: #15301f; --bad: #ff8a7d; --bad-soft: #3a1c19;
+    --warn: #f0be5a; --warn-soft: #36290f; --tag-bg: #212b38; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e131a; --surface: #161d27; --ink: #e5eaf2; --muted: #9ba7b9; --line: #2b3646;
+  --sign: #3d76d4; --sign-ink: #ffffff; --sign-soft: #1a2a42;
+  --good: #5cc488; --good-soft: #15301f; --bad: #ff8a7d; --bad-soft: #3a1c19;
+  --warn: #f0be5a; --warn-soft: #36290f; --tag-bg: #212b38; color-scheme: dark;
+}
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 16px/1.55 var(--f-body); }
+.wrap {
+  max-width: 1120px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 64px;
+  display: grid; gap: 56px;
+}
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.15 }
+h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; letter-spacing: -0.01em }
+h2 { font-size: 1.6rem; font-weight: 700 }
+h3 { font-size: 1.12rem; font-weight: 600 }
+p { margin: 0 }
+a { color: var(--sign) }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--sign); outline-offset: 2px }
+code, .tag { font-family: var(--f-mono); font-size: 0.86em }
+.tag { background: var(--tag-bg); border-radius: 4px; padding: 1px 6px; white-space: nowrap }
+.eyebrow { font-family: var(--f-display); font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.78rem; color: var(--muted) }
+
+/* Intestazione */
+header { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 32px; align-items: center }
+header .intro { display: grid; gap: 14px; max-width: 62ch }
+.lead { font-size: 1.12rem; color: var(--muted) }
+.sources { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 0.95rem }
+.hero-sign { display: grid; gap: 10px; justify-items: center }
+.plate {
+  font-family: var(--f-display); font-weight: 600; color: var(--sign-ink); background: var(--sign);
+  border: 3px solid var(--sign); box-shadow: inset 0 0 0 2px var(--sign-ink);
+  border-radius: 6px; padding: 14px 26px; font-size: clamp(1.4rem, 3.6vw, 2.1rem); line-height: 1.1; text-align: center; max-width: 100%;
+}
+.plate small { display: block; font-size: 0.5em; font-weight: 400; opacity: 0.85; margin-top: 4px; letter-spacing: 0.04em }
+.hero-tags { display: grid; gap: 4px; justify-items: center; font-size: 0.95rem }
+
+/* Diagramma */
+.section-head { display: grid; gap: 8px; max-width: 70ch; margin-bottom: 24px }
+.section-head p { color: var(--muted) }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 0.9rem; color: var(--muted); margin-top: 4px }
+.legend span { display: inline-flex; align-items: center; gap: 6px }
+.flow { list-style: none; margin: 0; padding: 0 }
+.step {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr) 56px minmax(0, 1.3fr);
+  position: relative; padding-bottom: 40px; scroll-margin-top: 16px;
+}
+.step::before { content: ""; position: absolute; left: 21px; top: 22px; bottom: 0; width: 2px; background: var(--line) }
+.node { grid-column: 1; grid-row: 1; width: 44px; height: 44px; display: grid; place-items: center; position: relative; z-index: 1 }
+.node span {
+  width: 30px; height: 30px; transform: rotate(45deg); background: var(--sign); display: grid; place-items: center; border-radius: 3px;
+}
+.node b { transform: rotate(-45deg); color: var(--sign-ink); font-family: var(--f-display); font-weight: 700; font-size: 0.95rem }
+.down {
+  position: absolute; left: 30px; bottom: 10px; font-size: 0.78rem; font-weight: 600; color: var(--muted);
+  font-family: var(--f-display); text-transform: uppercase; letter-spacing: 0.08em; background: var(--bg); padding: 0 4px;
+}
+.q { grid-column: 2; grid-row: 1; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-self: start; margin-left: 10px }
+.q p { color: var(--muted); font-size: 0.95rem }
+.arm { grid-column: 3; grid-row: 1; position: relative; height: 44px }
+.arm::before { content: ""; position: absolute; left: 0; right: 8px; top: 21px; height: 2px; background: var(--sign) }
+.arm::after { content: ""; position: absolute; right: 0; top: 16px; border: 6px solid transparent; border-left: 9px solid var(--sign); border-right: 0 }
+.arm i { position: absolute; left: 50%; top: 0; transform: translateX(-60%); font-style: normal; font-family: var(--f-display); font-weight: 700; font-size: 0.8rem; color: var(--sign); text-transform: uppercase; letter-spacing: 0.06em }
+.a { grid-column: 4; grid-row: 1; background: var(--sign-soft); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; align-self: start; min-width: 0 }
+.a .lbl { display: none }
+.a ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px }
+.a li::marker { color: var(--sign) }
+.a .note { font-size: 0.9rem; color: var(--muted) }
+.exs { display: grid; gap: 6px }
+.ex { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 0.95rem }
+.ex .no { text-decoration: line-through; text-decoration-color: var(--bad); color: var(--muted) }
+.ex .arrow { color: var(--muted) }
+.ex .ok {
+  font-family: var(--f-display); font-weight: 600; background: var(--sign); color: var(--sign-ink);
+  border-radius: 4px; padding: 1px 9px; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--sign-ink) 70%, transparent);
+}
+.src { font-size: 0.78rem; font-family: var(--f-display); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted) }
+.terms { display: grid; gap: 8px }
+.term { background: var(--surface); border-radius: 8px; padding: 8px 12px; display: grid; gap: 4px }
+.term strong { font-family: var(--f-display); font-size: 0.95rem }
+.terms.two { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+.end { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: start }
+.end .node span { border-radius: 50%; transform: none; background: var(--good) }
+.end .node b { transform: none }
+.end .q { border-color: var(--good) }
+.dates { width: 100%; border-collapse: collapse; font-size: 0.92rem }
+.dates th, .dates td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top }
+.dates th { font-family: var(--f-display); font-weight: 600; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em }
+.scroll { overflow-x: auto }
+
+/* Controllo */
+.checker { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 14px; min-width: 0 }
+label { font-family: var(--f-display); font-weight: 600 }
+input[type="text"] {
+  width: 100%; font: 1.1rem var(--f-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 8px; padding: 10px 12px;
+}
+.samples { display: flex; flex-wrap: wrap; gap: 6px }
+.samples button, .copy {
+  font: 0.86rem var(--f-body); color: var(--ink); background: var(--tag-bg); border: 1px solid transparent; border-radius: 999px; padding: 4px 11px; cursor: pointer;
+}
+.samples button:hover, .copy:hover { border-color: var(--sign) }
+.result { display: grid; gap: 12px }
+.out-row { display: grid; gap: 4px }
+.out-row .k { font-size: 0.8rem; color: var(--muted); font-family: var(--f-display); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em }
+.out-sign { justify-self: start; font-size: 1.3rem; padding: 8px 18px; text-align: left }
+.istat { font-family: var(--f-mono); font-size: 0.95rem; color: var(--muted); word-break: break-word }
+.tags-out { font-family: var(--f-mono); font-size: 0.9rem; background: var(--tag-bg); border-radius: 8px; padding: 10px 12px; margin: 0; white-space: pre-wrap; word-break: break-word }
+.issues { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px }
+.issue { border-radius: 8px; padding: 8px 12px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; font-size: 0.95rem }
+.issue .pill { font-family: var(--f-display); font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; border-radius: 999px; padding: 2px 8px; align-self: start; margin-top: 2px; white-space: nowrap }
+.issue.fix { background: var(--bad-soft) } .issue.fix .pill { background: var(--bad); color: var(--surface) }
+.issue.check { background: var(--warn-soft) } .issue.check .pill { background: var(--warn); color: var(--surface) }
+.issue.info { background: var(--sign-soft) } .issue.info .pill { background: var(--sign); color: var(--sign-ink) }
+.issue.okay { background: var(--good-soft) } .issue.okay .pill { background: var(--good); color: var(--surface) }
+.issue a { font-size: 0.85rem }
+.disclaimer { font-size: 0.85rem; color: var(--muted) }
+a.copy { display: inline-block; text-decoration: none; white-space: nowrap }
+.etym { gap: 6px }
+.etym:empty { display: none }
+.copy.primary { background: var(--sign); color: var(--sign-ink) }
+.cands { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px }
+.cands:empty { display: none }
+.cands button {
+  width: 100%; text-align: left; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px;
+  font: 0.92rem var(--f-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; cursor: pointer;
+}
+.cands button span { grid-column: 1; color: var(--muted); font-size: 0.86rem }
+.cands button code { grid-column: 2; grid-row: 1 / span 2; align-self: center; color: var(--muted) }
+.cands button:hover { border-color: var(--sign) }
+.cands li.sel button { border-color: var(--good); background: var(--good-soft) }
+
+/* Differenze e tag */
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px }
+table.diff { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; font-size: 0.95rem }
+table.diff th, table.diff td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line) }
+table.diff thead th { font-family: var(--f-display); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); background: var(--tag-bg) }
+table.diff tbody th { font-family: var(--f-display); font-weight: 600 }
+table.diff tr:last-child td, table.diff tr:last-child th { border-bottom: 0 }
+.taglist { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 10px; margin: 0 }
+.taglist div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; display: grid; gap: 2px }
+.taglist dt { font-family: var(--f-mono); font-size: 0.92rem; font-weight: 500 }
+.taglist dd { margin: 0; color: var(--muted); font-size: 0.93rem }
+.taglist .neg dt { color: var(--bad); text-decoration: line-through }
+footer { color: var(--muted); font-size: 0.88rem; display: grid; gap: 6px; max-width: 75ch }
+
+@media (max-width: 860px) {
+  header { grid-template-columns: minmax(0, 1fr) }
+  .hero-sign { justify-items: start }
+  .hero-tags { justify-items: start }
+  .step { grid-template-columns: 44px minmax(0, 1fr) }
+  .arm { display: none }
+  .a { grid-column: 2; grid-row: 2; margin: 10px 0 0 10px }
+  .a .lbl { display: block; font-family: var(--f-display); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--sign) }
+  .checker { grid-template-columns: minmax(0, 1fr) }
+  .terms.two { grid-template-columns: minmax(0, 1fr) }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .step:target .q { animation: flash 1.2s ease-out }
+  @keyframes flash { from { box-shadow: 0 0 0 4px var(--sign) } to { box-shadow: 0 0 0 0 transparent } }
+}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="intro">
+    <span class="eyebrow">OpenStreetMap Italia · tag <code>name</code></span>
+    <h1>Come scrivere il nome di una strada</h1>
+    <p class="lead">Un percorso a domande per trasformare quello che leggi sul cartello in un <code>name=*</code> corretto. Segue le convenzioni della comunità italiana di OSM, che adottano le istruzioni Istat sull'ordinamento ecografico con alcune eccezioni.</p>
+    <div class="sources">
+      <a href="https://wiki.openstreetmap.org/wiki/IT:Editing_Standards_and_Conventions#Nomi_delle_strade" target="_blank" rel="noopener">Wiki OSM: Nomi delle strade</a>
+      <a href="https://www.agenziaentrate.gov.it/portale/documents/20143/266134/Informativa+Istat_Istruzioni+ordinamento+ecografico.pdf/c7cd141f-4acb-cf5a-42b3-04ade2c69474" target="_blank" rel="noopener">Istat: Istruzioni per l'ordinamento ecografico (PDF)</a>
+    </div>
+  </div>
+  <div class="hero-sign" aria-label="Esempio di cartello">
+    <div class="plate">Via Venticinque Aprile<small>sul cartello: VIA XXV APRILE</small></div>
+    <div class="hero-tags">
+      <span class="tag">name=Via Venticinque Aprile</span>
+      <span class="tag">alt_name=Via XXV Aprile</span>
+    </div>
+  </div>
+</header>
+
+<section aria-labelledby="h-flow">
+  <div class="section-head">
+    <h2 id="h-flow">Il percorso</h2>
+    <p>Parti dal punto 0 e scendi. Quando la risposta è sì, applica la regola a destra e poi continua con il punto successivo: un nome può toccare più passaggi.</p>
+    <div class="legend">
+      <span><span class="ex"><span class="no">forma errata</span></span></span>
+      <span><span class="ex"><span class="ok">forma corretta</span></span></span>
+      <span><span class="src">OSM</span> = wiki italiana</span>
+      <span><span class="src">Istat</span> = istruzioni ecografiche</span>
+    </div>
+  </div>
+
+  <ol class="flow">
+
+    <li class="step" id="passo-0">
+      <div class="node"><span><b>0</b></span></div>
+      <div class="q">
+        <h3>Manca il nome?</h3>
+        <p>Non c'è un cartello, non l'hai annotato durante il rilievo, o la foto è illeggibile.</p>
+      </div>
+      <div class="arm"><i>Sì</i></div>
+      <div class="a">
+        <span class="lbl">Sì →</span>
+        <div class="terms">
+          <div class="term"><strong>La strada è davvero senza nome</strong><span>Chiedi prima a qualcuno del posto: spesso prende il nome della strada da cui parte. Se confermato: <span class="tag">noname=yes</span></span></div>
+          <div class="term"><strong>Il nome c'è ma non lo conosci</strong><span>Non inserire <span class="tag">name</span>. Niente <span class="tag">name=fixme</span> e niente <span class="tag">fixme=*</span>: OSM Inspector trova già le strade senza nome. Da immagini aeree di una zona che non conosci usa <span class="tag">highway=road</span>.</span></div>
+        </div>
+        <span class="src">OSM · fine del percorso</span>
+      </div>
+      <span class="down">No ↓</span>
+    </li>
+
+    <li class="step" id="passo-1">
+      <div class="node"><span><b>1</b></span></div>
+      <div class="q">
+        <h3>Le fonti non coincidono?</h3>
+        <p>Due cartelli diversi, un nome usato da tutti ma diverso da quello ufficiale, oppure un "già…" sulla targa.</p>
+      </div>
+      <div class="arm"><i>Sì</i></div>
+      <div class="a">
+        <span class="lbl">Sì →</span>
+        <ul>
+          <li>Di regola vale il cartello toponomastico.</li>
+          <li>Se i cartelli si contraddicono, chiedi il nome ufficiale all'ufficio toponomastica del Comune.</li>
+          <li>In <span class="tag">name</span> va solo il nome attuale. Il nome precedente o popolare può andare in <span class="tag">old_name</span>.</li>
+        </ul>
+        <div class="exs">
+          <div class="ex"><span class="no">Piazza della Repubblica (già Piazza Esedra)</span><span class="arrow">→</span><span class="ok">Piazza della Repubblica</span> <span class="tag">old_name=Piazza Esedra</span></div>
+        </div>
+        <span class="src">OSM · Istat §15</span>
+      </div>
+      <span class="down">No ↓</span>
+    </li>
+
+    <li class="step" id="passo-2">
+      <div class="node"><span><b>2</b></span></div>
+      <div class="q">
+        <h3>È tutto maiuscolo o scritto male?</h3>
+        <p>Maiuscolo continuo, spazi doppi, accenti resi con l'apostrofo, "via" minuscolo.</p>
+      </div>
+      <div class="arm"><i>Sì</i></div>
+      <div class="a">
+        <span class="lbl">Sì →</span>
+        <ul>
+          <li>Scrivi secondo la grammatica italiana: maiuscole e minuscole normali, un solo spazio tra le parole.</li>
+          <li>La specie (Via, Piazza, Viale…) prende l'iniziale maiuscola. Articoli e preposizioni restano minuscoli.</li>
+          <li>Usa le vere lettere accentate: à è é ì ò ù.</li>
+        </ul>
+        <div class="exs">
+          <div class="ex"><span class="no">PIAZZA DELLA LIBERTA'</span><span class="arrow">→</span><span class="ok">Piazza della Libertà</span></div>
+          <div class="ex"><span class="no">via dei mille</span><span class="arrow">→</span><span class="ok">Via dei Mille</span></div>
+        </div>
+        <span class="src">OSM (diverso da Istat, che registra in maiuscolo)</span>
+      </div>
+      <span class="down">No ↓</span>
+    </li>
+
+    <li class="step" id="passo-3">
+      <div class="node"><span><b>3</b></span></div>
+      <div class="q">
+        <h3>Ci sono abbreviazioni o punti?</h3>
+        <p>V.le, P.zza, C.so, S., F.lli, Gen., iniziali puntate.</p>
+      </div>
+      <div class="arm"><i>Sì</i></div>
+      <div class="a">
+        <span class="lbl">Sì →</span>
+        <ul>
+          <li>Scrivi tutto per esteso, senza punti né altra punteggiatura. Un programma può abbreviare un nome intero, ma non può ricostruire un nome abbreviato.</li>
+          <li>Se proprio non trovi la forma completa, l'abbreviazione è meglio di niente: intanto cercala nello stradario del Comune.</li>
+        </ul>
+        <div class="exs">
+          <div class="ex"><span class="no">V.le G. Matteotti</span><span class="arrow">→</span><span class="ok">Viale Giacomo Matteotti</span></div>
+          <div class="ex"><span class="no">Via F.lli Cervi</span><span class="arrow">→</span><span class="ok">Via Fratelli Cervi</span></div>
+        </div>
+        <span class="src">OSM · Istat, premessa</span>
+      </div>
+      <span class="down">No ↓</span>
+    </li>
+
+    <li class="step" id="passo-4">
+      <div class="node"><span><b>4</b></span></div>
+      <div class="q">
+        <h3>È intitolata a una persona?</h3>
+        <p>Personaggi storici o contemporanei, famosi o locali.</p>
+      </div>
+      <div class="arm"><i>Sì</i></div>
+      <div class="a">
+        <span class="lbl">Sì →</span>
+        <ul>
+          <li>Prima il nome, poi il cognome, completi. Il solo cognome è ambiguo: "Garibaldi" può essere Giuseppe, Anita o la Brigata.</li>
+          <li>Particelle del cognome (de', della, degli…): minuscole per personaggi anteriori al XIX secolo, maiuscole per quelli successivi.</li>
+          <li>Più persone: unite da "e", senza trattino. Il trattino solo per un doppio cognome attestato.</li>
+          <li>Pseudonimo: o il nome reale o lo pseudonimo, mai "detto".</li>
+        </ul>
+        <div class="exs">
+          <div class="ex"><span class="no">Via A. Moro</span><span class="arrow">→</span><span class="ok">Via Aldo Moro</span></div>
+          <div class="ex"><span class="ok">Via Piero della Francesca</span><span class="ok">Via Enrico De Nicola</span></div>
+          <div class="ex"><span class="no">Via Falcone-Borsellino</span><span class="arrow">→</span><span class="ok">Via Giovanni Falcone e Paolo Borsellino</span></div>
+          <div class="ex"><span class="no">Piazza Michelangelo Merisi detto il Caravaggio</span><span class="arrow">→</span><span class="ok">Piazza Michelangelo Merisi</span><span class="arrow">o</span><span class="ok">Piazza Caravaggio</span></div>
+        </div>
+        <span class="src">OSM · Istat §28, 29, 31, 36</span>
+      </div>
+      <span class="down">No ↓</span>
+    </li>
+
+    <li class="step" id="passo-5">
+      <div class="node"><span><b>5</b></span></div>
+      <div class="q">
+        <h3>C'è un titolo o "Fratelli"?</h3>
+        <p>Titoli onorifici, religiosi, nobiliari, gradi militari, professioni.</p>
+      </div>
+      <div class="arm"><i>Sì</i></div>
+      <div class="a">
+        <span class="lbl">Sì →</span>
+        <ul>
+          <li>Il titolo va prima del nome, con l'iniziale maiuscola.</li>
+          <li>Re, principe, duca, marchese, conte, visconte, barone seguiti dal territorio vanno dopo il cognome.</li>
+          <li>"Fratelli" e "Sorelle": solo il sostantivo e il cognome.</li>
+          <li>Più titoli insieme: Istat ne tiene uno solo, il più adatto.</li>
+        </ul>
+        <div class="exs">
+          <div class="ex"><span class="ok">Via Don Giovanni Minzoni</span><span class="ok">Via Maresciallo Luigi Cadorna</span></div>
+          <div class="ex"><span class="ok">Via Camillo Benso Conte di Cavour</span></div>
+          <div class="ex"><span class="ok">Via Fratelli Rosselli</span><span class="ok">Via Sorelle Tetrazzini</span></div>
+          <div class="ex"><span class="no">Via Professore Dottor Angelo Nicolato</span><span class="arrow">→</span><span class="ok">Via Professore Angelo Nicolato</span></div>
+        </div>
+        <span class="src">OSM · Istat §32, 33</span>
+      </div>
+      <span class="down">No ↓</span>
+    </li>
+
+    <li class="step" id="passo-6">
+      <div class="node"><span><b>6</b></span></div>
+      <div class="q">
+        <h3>È dedicata a un santo o alla Madonna?</h3>
+        <p>San, Sant', Santo, Santa, titoli mariani.</p>
+      </div>
+      <div class="arm"><i>Sì</i></div>
+      <div class="a">
+        <span class="lbl">Sì →</span>
+        <ul>
+          <li>Il prefisso fa parte del nome e va scritto per intero.</li>
+          <li>Quale prefisso: <b>Sant'</b> davanti a vocale, <b>Santo</b> davanti a s + consonante, <b>San</b> davanti alle altre consonanti, <b>Santa</b> per le sante davanti a consonante.</li>
+          <li>Se il santo è ambiguo, specifica quale. Vale anche per la Madonna.</li>
+        </ul>
+        <div class="exs">
+          <div class="ex"><span class="no">Via S. Stefano</span><span class="arrow">→</span><span class="ok">Via Santo Stefano</span></div>
+          <div class="ex"><span class="no">Via San Stefano</span><span class="arrow">→</span><span class="ok">Via Santo Stefano</span></div>
+          <div class="ex"><span class="no">Via Santa Agata</span><span class="arrow">→</span><span class="ok">Via Sant'Agata</span></div>
+          <div class="ex"><span class="ok">Piazza San Marco</span><span class="ok">Via Santa Chiara</span></div>
+          <div class="ex"><span class="no">Via Sant'Antonio</span><span class="arrow">→</span><span class="ok">Via Sant'Antonio di Padova</span><span class="arrow">o</span><span class="ok">Via Sant'Antonio Abate</span></div>
+          <div class="ex"><span class="no">Via della Madonna</span><span class="arrow">→</span><span class="ok">Via Madonna delle Grazie</span></div>
+        </div>
+        <span class="src">OSM · Istat §30 · scelta del prefisso: grammatica italiana</span>
+      </div>
+      <span class="down">No ↓</span>
+    </li>
+
+    <li class="step" id="passo-7">
+      <div class="node"><span><b>7</b></span></div>
+      <div class="q">
+        <h3>Contiene una data?</h3>
+        <p>In cifre arabe o romane, completa o parziale.</p>
+      </div>
+      <div class="arm"><i>Sì</i></div>
+      <div class="a">
+        <span class="lbl">Sì →</span>
+        <div class="scroll">
+          <table class="dates">
+            <thead><tr><th>La data ha</th><th>Regola</th><th>Esempio</th></tr></thead>
+            <tbody>
+              <tr><td>giorno, mese, anno</td><td>giorno e anno in cifre arabe, mese in lettere</td><td><span class="ex"><span class="no">Via XVIII Agosto 1944</span></span> → <span class="ex"><span class="ok">Via 18 Agosto 1944</span></span></td></tr>
+              <tr><td>giorno e mese</td><td>giorno in lettere; i numeri romani, se vuoi, in <span class="tag">alt_name</span></td><td><span class="ex"><span class="ok">Via Venticinque Aprile</span></span> <span class="tag">alt_name=Via XXV Aprile</span></td></tr>
+              <tr><td>mese e anno</td><td>mese in lettere, anno in cifre</td><td><span class="ex"><span class="ok">Via Maggio 1898</span></span></td></tr>
+              <tr><td>anno abbreviato</td><td>anno per esteso (unica eccezione: Ragazzi del 99)</td><td><span class="ex"><span class="no">Via Italia '61</span></span> → <span class="ex"><span class="ok">Via Italia 1861</span></span></td></tr>
+              <tr><td>più giorni o anni</td><td>trattino senza spazi</td><td><span class="ex"><span class="ok">Via 8-9 Maggio 1848</span></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <span class="src">OSM · Istat §36, 38</span>
+      </div>
+      <span class="down">No ↓</span>
+    </li>
+
+    <li class="step" id="passo-8">
+      <div class="node"><span><b>8</b></span></div>
+      <div class="q">
+        <h3>Ci sono altri numeri?</h3>
+        <p>Quantità, ordinali di papi e re, numerazioni di strade, codici come SP 217.</p>
+      </div>
+      <div class="arm"><i>Sì</i></div>
+      <div class="a">
+        <span class="lbl">Sì →</span>
+        <div class="terms two">
+          <div class="term"><strong>Quantità o parte del nome</strong><span>In lettere, anche se romani.</span></div>
+          <div class="term"><strong>Successione di strade</strong><span>Ordinale in lettere, dopo la specie.</span></div>
+          <div class="term"><strong>Codice dell'ente gestore</strong><span>In cifre arabe; il codice va anche in <span class="tag">ref</span>.</span></div>
+        </div>
+        <div class="exs">
+          <div class="ex"><span class="no">Via 4 Cantoni</span><span class="arrow">→</span><span class="ok">Via Quattro Cantoni</span></div>
+          <div class="ex"><span class="no">Piazza Papa Giovanni Paolo II</span><span class="arrow">→</span><span class="ok">Piazza Papa Giovanni Paolo Secondo</span></div>
+          <div class="ex"><span class="ok">Strada Prima di Quartiere dell'Industria</span></div>
+          <div class="ex"><span class="ok">Strada Provinciale 217 dei Laghi</span> <span class="tag">ref=SP217</span></div>
+        </div>
+        <span class="src">OSM · Istat §39, 41</span>
+      </div>
+      <span class="down">No ↓</span>
+    </li>
+
+    <li class="step" id="passo-9">
+      <div class="node"><span><b>9</b></span></div>
+      <div class="q">
+        <h3>Ci sono aggiunte che non fanno parte del nome?</h3>
+        <p>Spiegazioni sotto il nome, "Prolungamento", "Tronco", professioni tra parentesi.</p>
+      </div>
+      <div class="arm"><i>Sì</i></div>
+      <div class="a">
+        <span class="lbl">Sì →</span>
+        <ul>
+          <li>Togli le spiegazioni: restano sulla targa, non nel nome.</li>
+          <li>Un prolungamento prende il nome della strada esistente.</li>
+          <li>Il trattino (senza spazi) serve solo per origine e destinazione, doppi cognomi e date.</li>
+        </ul>
+        <div class="exs">
+          <div class="ex"><span class="no">Via Palestro – battaglia di indipendenza 31 maggio 1859</span><span class="arrow">→</span><span class="ok">Via Palestro</span></div>
+          <div class="ex"><span class="no">Via John F. Kennedy – Presidente Stati Uniti</span><span class="arrow">→</span><span class="ok">Via John Fitzgerald Kennedy</span></div>
+          <div class="ex"><span class="no">Prolungamento Via della Pigna</span><span class="arrow">→</span><span class="ok">Via della Pigna</span></div>
+        </div>
+        <span class="src">Istat §36, 37, 42</span>
+      </div>
+      <span class="down">No ↓</span>
+    </li>
+
+    <li class="step" id="passo-10">
+      <div class="node"><span><b>10</b></span></div>
+      <div class="q">
+        <h3>Sei in una zona bilingue?</h3>
+        <p>Alto Adige, Valle d'Aosta, aree con minoranze linguistiche riconosciute.</p>
+      </div>
+      <div class="arm"><i>Sì</i></div>
+      <div class="a">
+        <span class="lbl">Sì →</span>
+        <ul>
+          <li>La strada può avere un nome in ogni lingua: aggiungi <span class="tag">name:it</span>, <span class="tag">name:de</span>, <span class="tag">name:fr</span>… e componi <span class="tag">name</span> come indicato nella pagina <a href="https://wiki.openstreetmap.org/wiki/Bilingual_street_names" target="_blank" rel="noopener">Bilingual street names</a>.</li>
+          <li>Solo qui sono ammessi caratteri speciali propri dell'altra lingua (ß, ä…).</li>
+        </ul>
+        <span class="src">OSM · Istat §35</span>
+      </div>
+      <span class="down">No ↓</span>
+    </li>
+
+    <li class="end" id="passo-fine">
+      <div class="node"><span><b>✓</b></span></div>
+      <div class="q">
+        <h3>Inserisci i tag</h3>
+        <p><span class="tag">name</span> con il nome così ottenuto, più se servono <span class="tag">old_name</span>, <span class="tag">alt_name</span>, <span class="tag">ref</span> e i <span class="tag">name:xx</span>. Per i dubbi rimasti vale il documento Istat.</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section aria-labelledby="h-check">
+  <div class="section-head">
+    <h2 id="h-check">Prova un nome</h2>
+    <p>Scrivi il nome come lo leggi sul cartello o nei dati importati. Il controllo segnala cosa toccare e propone una forma da verificare.</p>
+  </div>
+  <div class="checker">
+    <form class="panel" id="check-form" autocomplete="off">
+      <label for="nome-input">Nome sul cartello</label>
+      <input type="text" id="nome-input" value="V.LE IV NOVEMBRE" spellcheck="false">
+      <div>
+        <span class="eyebrow">Esempi</span>
+        <div class="samples" id="samples">
+          <button type="button">PIAZZA DELLA LIBERTA'</button>
+          <button type="button">Via S. Antonio</button>
+          <button type="button">Via San Stefano</button>
+          <button type="button">Via Santa Agata</button>
+          <button type="button">Piazza Garibaldi</button>
+          <button type="button">Via don Giovanni Minzoni</button>
+          <button type="button">Via Prof. Dott. Angelo Nicolato</button>
+          <button type="button">Via Fratelli Carlo e Nello Rosselli</button>
+          <button type="button">Via G. Garibaldi (già Via Roma)</button>
+          <button type="button">Piazza Papa Giovanni Paolo II</button>
+          <button type="button">Via 25 aprile</button>
+          <button type="button">via 4 cantoni</button>
+          <button type="button">Via Palestro - battaglia del 1859</button>
+          <button type="button">Via Circonvallazione Aldo Moro</button>
+        </div>
+      </div>
+      <p class="disclaimer">Il controllo è automatico e non conosce la storia della strada. Il nome ufficiale lo stabilisce il Comune: usa la proposta come punto di partenza.</p>
+    </form>
+    <div class="panel result" id="result" aria-live="polite"></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-diff">
+  <div class="grid2">
+    <div>
+      <div class="section-head">
+        <h2 id="h-diff">Dove OSM e Istat si separano</h2>
+        <p>La comunità italiana adotta le istruzioni Istat, ma alcune scelte valgono per lo stradario del Comune e non per la mappa.</p>
+      </div>
+      <div class="scroll">
+        <table class="diff">
+          <thead><tr><th>Tema</th><th>In OSM</th><th>Nello stradario Istat</th></tr></thead>
+          <tbody>
+            <tr><th>Maiuscole</th><td>Grammatica italiana: Via della Libertà</td><td>Tutto maiuscolo: VIA DELLA LIBERTA'</td></tr>
+            <tr><th>Accenti</th><td>Lettere accentate: à è ì ò ù</td><td>Lettera seguita da apice</td></tr>
+            <tr><th>Nome precedente</th><td>Facoltativo in <span class="tag">old_name</span></td><td>Omesso dalla registrazione</td></tr>
+            <tr><th>Giorno e mese in romani</th><td>Giorno in lettere; romani facoltativi in <span class="tag">alt_name</span></td><td>Solo giorno in lettere</td></tr>
+            <tr><th>Specie ripetute</th><td>Si mappa il nome ufficiale così com'è (es. Via Circonvallazione)</td><td>Nelle nuove intitolazioni si evitano: CIRCONVALLAZIONE ALDO MORO</td></tr>
+            <tr><th>Codice della strada</th><td>Nel nome se è ufficiale, e sempre in <span class="tag">ref</span></td><td>Nella denominazione in cifre arabe</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="section-head">
+        <h2 id="h-tags">I tag in breve</h2>
+      </div>
+      <dl class="taglist">
+        <div><dt>name=*</dt><dd>Il nome attuale, completo, scritto con le regole qui sopra.</dd></div>
+        <div><dt>old_name=*</dt><dd>Il nome precedente o quello che usano tutti ma non è più ufficiale.</dd></div>
+        <div><dt>alt_name=*</dt><dd>Forma alternativa, ad esempio il giorno in numeri romani.</dd></div>
+        <div><dt>ref=*</dt><dd>Codice amministrativo per le strade statali, regionali, provinciali (es. SS42).</dd></div>
+        <div><dt>name:etymology=*</dt><dd>Nome completo di chi o cosa ricorda la strada, solo se l'origine non è ovvia.</dd></div>
+        <div><dt>name:etymology:wikidata=*</dt><dd>Codice Wikidata (Q…) di quella persona, luogo o evento, verificato.</dd></div>
+        <div><dt>noname=yes</dt><dd>La strada non ha nome, ed è stato verificato.</dd></div>
+        <div><dt>name:it, name:de…</dt><dd>Nomi nelle singole lingue, nelle zone bilingui.</dd></div>
+        <div class="neg"><dt>name=fixme</dt><dd>Mai. Se il nome non è noto, lascia vuoto.</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Fonti: pagina wiki <a href="https://wiki.openstreetmap.org/wiki/IT:Editing_Standards_and_Conventions#Nomi_delle_strade" target="_blank" rel="noopener">IT:Editing Standards and Conventions, sezione Nomi delle strade</a> e Istat, <a href="https://www.agenziaentrate.gov.it/portale/documents/20143/266134/Informativa+Istat_Istruzioni+ordinamento+ecografico.pdf/c7cd141f-4acb-cf5a-42b3-04ade2c69474" target="_blank" rel="noopener">Istruzioni per l'ordinamento ecografico</a> (i numeri § si riferiscono ai paragrafi di questo documento).</p>
+  <p>Per correggere in blocco le strade già mappate esiste una challenge MapRoulette citata nella wiki.</p>
+</footer>
+</div>
+
+<script>
+(function () {
+  var MONTHS = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+  var DAY = [null,'Primo','Due','Tre','Quattro','Cinque','Sei','Sette','Otto','Nove','Dieci','Undici','Dodici','Tredici','Quattordici','Quindici','Sedici','Diciassette','Diciotto','Diciannove','Venti','Ventuno','Ventidue','Ventitré','Ventiquattro','Venticinque','Ventisei','Ventisette','Ventotto','Ventinove','Trenta','Trentuno'];
+  var CARD = DAY.slice(); CARD[1] = 'Uno';
+  var ORD = [null,'Primo','Secondo','Terzo','Quarto','Quinto','Sesto','Settimo','Ottavo','Nono','Decimo','Undicesimo','Dodicesimo','Tredicesimo','Quattordicesimo','Quindicesimo','Sedicesimo','Diciassettesimo','Diciottesimo','Diciannovesimo','Ventesimo','Ventunesimo','Ventiduesimo','Ventitreesimo'];
+  var LOWER = ['di','del','della','dello','dei','degli','delle','da','dal','dalla','dallo','dai','dagli','dalle','a','al','alla','allo','ai','agli','alle','in','nel','nella','nello','nei','negli','nelle','su','sul','sulla','sullo','sui','sugli','sulle','per','con','tra','fra','e','ed','il','lo','la','i','gli','le'];
+  var ELIDED = ['dell','dall','all','nell','sull','d','l','de','un'];
+  var ABBR = {
+    'v.le':'Viale','vle':'Viale','p.za':'Piazza','p.zza':'Piazza','pza':'Piazza','pzza':'Piazza','p.le':'Piazzale','p.tta':'Piazzetta',
+    'c.so':'Corso','cso':'Corso','l.go':'Largo','lgo':'Largo','v.lo':'Vicolo','vlo':'Vicolo','str.':'Strada','f.lli':'Fratelli','flli':'Fratelli',
+    'gen.':'Generale','col.':'Colonnello','mons.':'Monsignore','prof.':'Professore','dott.':'Dottor','avv.':'Avvocato','ing.':'Ingegnere',
+    'card.':'Cardinale','sen.':'Senatore','on.':'Onorevole','cav.':'Cavaliere','cap.':'Capitano','ten.':'Tenente',
+    's.ta':'Santa','sta':'Santa','s.to':'Santo','sto':'Santo'
+  };
+  var DUG = ['via','viale','vialetto','piazza','piazzale','piazzetta','largo','larghetto','slargo','spiazzo','corso','vicolo','vico','vicoletto','strada','stradella','stradello','stradone','salita','discesa','scesa','calata','calle','corte','cortile','galleria','gradinata','scalinata','passaggio','passeggiata','percorso','pista','ponte','raccordo','rampa','ronco','rotatoria','rotonda','sentiero','sottopasso','sovrappasso','cavalcavia','tangenziale','traversa','viottolo','circonvallazione','litoranea','arco','autostrada','belvedere','molo','parcheggio','tratturo'];
+  var SECOND_DUG = ['circonvallazione','litoranea','lungomare','traversa','tangenziale','rampa','discesa','scesa','salita','stradella','stradello','stradone','passeggiata'];
+  var ACC = { a:'à', e:'è', i:'ì', o:'ò', u:'ù', A:'À', E:'È', I:'Ì', O:'Ò', U:'Ù' };
+  var TITLES = ['don','padre','papa','generale','maresciallo','monsignore','monsignor','professore','professor','dottor','dottore','cardinale','cardinal','beato','beata','sindaco','cavaliere','avvocato','ingegnere','onorevole','senatore','colonnello','capitano','tenente','ammiraglio','comandante','suor','frate','madre','maestro','commendatore','canonico','arciprete','vescovo','arcivescovo','presidente','ragioniere','geometra'];
+  var NOBLE = ['re','regina','principe','principessa','duca','duchessa','marchese','marchesa','conte','contessa','visconte','barone','baronessa'];
+  /* nomi maschili in -a e femminili non in -a, per scegliere San / Santa */
+  var MASC_A = ['andrea','luca','nicola','elia','mattia','tobia','geremia','isaia','zaccaria','giona','barnaba','bonaventura','cosma','enea','battista'];
+  var FEM_X = ['beatrice','clotilde','matilde','rachele','croce','geltrude','gertrude','adelaide','agnese','irene','ester'];
+  var AMBIG = {
+    antonio: 'di Padova (Istat: da Padova) oppure Abate',
+    giovanni: 'Battista, Evangelista, Bosco…',
+    francesco: "d'Assisi, di Paola, Saverio…",
+    caterina: "da Siena, d'Alessandria…",
+    giacomo: 'Maggiore o Minore',
+    maria: 'delle Grazie, Assunta, Maggiore…'
+  };
+  /* cognomi usati spesso da soli sui cartelli, con la forma completa più probabile */
+  var FAMOUS = {
+    garibaldi: 'Giuseppe Garibaldi (o Anita Garibaldi)', mazzini: 'Giuseppe Mazzini', cavour: 'Camillo Benso Conte di Cavour',
+    verdi: 'Giuseppe Verdi', dante: 'Dante Alighieri', manzoni: 'Alessandro Manzoni', marconi: 'Guglielmo Marconi',
+    matteotti: 'Giacomo Matteotti', gramsci: 'Antonio Gramsci', carducci: 'Giosuè Carducci', leopardi: 'Giacomo Leopardi',
+    petrarca: 'Francesco Petrarca', puccini: 'Giacomo Puccini', rossini: 'Gioachino Rossini', volta: 'Alessandro Volta',
+    galilei: 'Galileo Galilei', colombo: 'Cristoforo Colombo', pascoli: 'Giovanni Pascoli', foscolo: 'Ugo Foscolo',
+    oberdan: 'Guglielmo Oberdan', battisti: 'Cesare Battisti', diaz: 'Armando Diaz', cadorna: 'Luigi Cadorna',
+    mameli: 'Goffredo Mameli', kennedy: 'John Fitzgerald Kennedy (o Robert Kennedy)', moro: 'Aldo Moro', gobetti: 'Piero Gobetti',
+    pellico: 'Silvio Pellico', alfieri: 'Vittorio Alfieri', goldoni: 'Carlo Goldoni', tasso: 'Torquato Tasso',
+    ariosto: 'Ludovico Ariosto', boccaccio: 'Giovanni Boccaccio', machiavelli: 'Niccolò Machiavelli', vespucci: 'Amerigo Vespucci',
+    donizetti: 'Gaetano Donizetti', fermi: 'Enrico Fermi', meucci: 'Antonio Meucci', torricelli: 'Evangelista Torricelli',
+    deledda: 'Grazia Deledda', pirandello: 'Luigi Pirandello', verga: 'Giovanni Verga', parini: 'Giuseppe Parini',
+    crispi: 'Francesco Crispi', giolitti: 'Giovanni Giolitti', nievo: 'Ippolito Nievo', bixio: 'Nino Bixio',
+    pertini: 'Sandro Pertini', einaudi: 'Luigi Einaudi', togliatti: 'Palmiro Togliatti', nenni: 'Pietro Nenni',
+    gioberti: 'Vincenzo Gioberti', cattaneo: 'Carlo Cattaneo', montessori: 'Maria Montessori', manin: 'Daniele Manin',
+    cairoli: 'Benedetto Cairoli (o Fratelli Cairoli)', bandiera: 'Fratelli Bandiera', rosselli: 'Fratelli Rosselli', cervi: 'Fratelli Cervi'
+  };
+  function saintFor(name) {
+    var n = name.toLowerCase();
+    if (/^[aeiouàèéìòù]/.test(n)) return "Sant'";
+    if ((/[aà]$/.test(n) && MASC_A.indexOf(n) < 0) || FEM_X.indexOf(n) >= 0) return 'Santa';
+    if (/^s[^aeiouàèéìòù]/.test(n)) return 'Santo';
+    return 'San';
+  }
+  function isCapWord(w) { return /^[A-ZÀ-Ý][a-zà-ÿ'’]+$/.test(w || ''); }
+
+  function romanValue(t) {
+    if (!/^[IVX]+$/.test(t)) return 0;
+    if (!/^(X{0,3})(IX|IV|V?I{0,3})$/.test(t)) return 0;
+    var map = { I:1, V:5, X:10 }, n = 0;
+    for (var i = 0; i < t.length; i++) {
+      var v = map[t[i]], nx = map[t[i + 1]] || 0;
+      n += v < nx ? -v : v;
+    }
+    return n;
+  }
+  function cap(w) { return w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w; }
+  function isMonth(t) { return t && MONTHS.indexOf(t.toLowerCase()) >= 0; }
+  function isYear(t) { return /^\d{4}$/.test(t || ''); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+  function titleToken(tok, idx) {
+    var parts = tok.split(/(['’])/);
+    return parts.map(function (p, j) {
+      if (p === "'" || p === '’') return "'";
+      var lw = p.toLowerCase();
+      var first = idx === 0 && j === 0;
+      if (!first && j === 0 && parts.length > 1 && ELIDED.indexOf(lw) >= 0) return lw;
+      if (!first && parts.length === 1 && LOWER.indexOf(lw) >= 0) return lw;
+      return cap(p);
+    }).join('');
+  }
+  function fixAccent(tok) {
+    var m = tok.match(/^(.*[A-Za-zÀ-ÿ])([aeiouAEIOU])['’]$/);
+    if (!m) return null;
+    if (['de','co','po','mo'].indexOf((m[1] + m[2]).toLowerCase()) >= 0) return null;
+    return m[1] + ACC[m[2]];
+  }
+  function toIstat(s) {
+    return s.toUpperCase().replace(/[ÀÁ]/g, "A'").replace(/[ÈÉ]/g, "E'").replace(/[ÌÍ]/g, "I'").replace(/[ÒÓ]/g, "O'").replace(/[ÙÚ]/g, "U'");
+  }
+
+  function analyze(raw) {
+    var out = { issues: [], tags: [] };
+    function add(level, step, text) { out.issues.push({ level: level, step: step, text: text }); }
+    var s = raw;
+    if (!s.trim()) return null;
+
+    if (/\s{2,}/.test(s) || s !== s.trim()) add('fix', 2, 'Spazi doppi o ai bordi: lascia un solo spazio tra le parole.');
+    s = s.trim().replace(/\s+/g, ' ');
+
+    var oldName = null;
+    var mOld = s.match(/\s*(?:\(|,|–|—|-)?\s*\bgi(?:à|a'|a’|a)\s+([^)]+)\)?\s*$/i);
+    if (mOld && mOld.index > 0) {
+      oldName = mOld[1].trim();
+      s = s.slice(0, mOld.index).trim();
+      add('fix', 1, 'Il nome precedente non va in name: spostato in old_name.');
+    }
+    var mSpec = s.match(/\s+[–—-]\s+(.+)$/);
+    if (mSpec) {
+      s = s.slice(0, mSpec.index).trim();
+      add('fix', 9, 'Rimossa la specificazione "' + mSpec[1] + '": resta sulla targa, non nel nome. Il trattino si usa solo senza spazi.');
+    }
+    if (/[()\[\]]/.test(s)) add('check', 9, 'Parentesi nel nome: quello che c\'è dentro di solito è una specificazione da togliere.');
+
+    var letters = s.replace(/[^A-Za-zÀ-ÿ]/g, '');
+    var allCaps = letters.length > 3 && s === s.toUpperCase();
+    var lowerStart = /^[a-zà-ÿ]/.test(s);
+    if (allCaps) add('fix', 2, 'Scritto tutto in maiuscolo: convertito con maiuscole e minuscole normali.');
+    else if (lowerStart) add('fix', 2, 'La specie (Via, Piazza…) prende l\'iniziale maiuscola.');
+
+    var toks = [];
+    s.split(' ').forEach(function (t) {
+      var m = t.match(/^([^.\s]+\.)([A-Za-zÀ-ÿ].*)$/);
+      if (m && !ABBR[t.toLowerCase()] && (ABBR[m[1].toLowerCase()] || /^[A-Za-zÀ-ÿ]\.$/.test(m[1]) || /^ss\.$/i.test(m[1]))) toks.push(m[1], m[2]);
+      else toks.push(t);
+    });
+    var res = [], alt = [], altUsed = false, initials = [], unknownDots = [];
+    var firstLow = (toks[0] || '').toLowerCase();
+    var adminRoad = /^(strada (provinciale|statale|regionale|comunale)|autostrada)\b/i.test(s);
+
+    for (var i = 0; i < toks.length; i++) {
+      var t = toks[i], lw = t.toLowerCase(), next = toks[i + 1], next2 = toks[i + 2];
+      var word = null;
+
+      if (i === 0 && (lw === 'v.' || lw === 'v')) word = 'Via';
+      else if (ABBR[lw]) word = ABBR[lw];
+      if (word) {
+        add('fix', lw.indexOf('s') === 0 && /^s\.?t[ao]$/.test(lw) ? 6 : 3, '"' + t + '" scritto per esteso: ' + word + '.');
+        res.push(word); alt.push(word); continue;
+      }
+      if (lw === 's.' || lw === 's') { res.push(t.toUpperCase()); alt.push(t.toUpperCase()); continue; }
+      if (lw === 'ss.' || (lw === 'ss' && !adminRoad)) {
+        add('check', 6, '"' + t + '" può stare per Santi (più santi) o per Santissimo/Santissima: scrivilo per esteso.');
+        res.push(t); alt.push(t); continue;
+      }
+      if (/^[A-Za-zÀ-ÿ]\.$/.test(t)) { initials.push(t); res.push(t); alt.push(t); continue; }
+      if (/\./.test(t)) { unknownDots.push(t); }
+
+      var rv = romanValue(t);
+      if (rv && !(t === 'I' && !isMonth(next))) {
+        if (isMonth(next)) {
+          if (isYear(next2)) {
+            res.push(String(rv)); alt.push(t);
+            add('fix', 7, 'Data completa: il giorno ' + t + ' va in cifre arabe (' + rv + ').');
+          } else if (DAY[rv]) {
+            res.push(DAY[rv]); alt.push(t); altUsed = true;
+            add('fix', 7, 'Giorno e mese senza anno: ' + t + ' si scrive in lettere (' + DAY[rv] + '). La forma romana può andare in alt_name.');
+          } else { res.push(t); alt.push(t); }
+          continue;
+        }
+        if (ORD[rv]) {
+          res.push(ORD[rv]); alt.push(t);
+          add('fix', 8, 'Numero romano ' + t + ' scritto in lettere: ' + ORD[rv] + '.');
+        } else {
+          res.push(t); alt.push(t);
+          add('check', 8, 'Numero romano ' + t + ': scrivilo in lettere.');
+        }
+        continue;
+      }
+
+      if (/^\d+$/.test(t)) {
+        var n = parseInt(t, 10);
+        if (isMonth(next)) {
+          if (isYear(next2)) { res.push(t); alt.push(t); }
+          else if (DAY[n]) {
+            res.push(DAY[n]); alt.push(t);
+            add('fix', 7, 'Giorno e mese senza anno: ' + t + ' si scrive in lettere (' + DAY[n] + ').');
+          } else { res.push(t); alt.push(t); }
+          continue;
+        }
+        if (isYear(t)) { res.push(t); alt.push(t); continue; }
+        if (adminRoad) {
+          res.push(t); alt.push(t);
+          var pre = /provinciale/i.test(s) ? 'SP' : /statale/i.test(s) ? 'SS' : /regionale/i.test(s) ? 'SR' : null;
+          if (pre) out.tags.push('ref=' + pre + t);
+          add('info', 8, 'Codice amministrativo: resta in cifre' + (pre ? ' e va anche in ref.' : '.'));
+          continue;
+        }
+        if (CARD[n]) {
+          res.push(CARD[n]); alt.push(t);
+          add('fix', 8, 'Il numero ' + t + ' fa parte del nome: scritto in lettere (' + CARD[n] + ').');
+        } else {
+          res.push(t); alt.push(t);
+          add('check', 8, 'Il numero ' + t + ': se è una quantità o fa parte del nome, va in lettere.');
+        }
+        continue;
+      }
+      if (/^\d+-\d+$/.test(t)) { res.push(t); alt.push(t); continue; }
+      if (/^['’]\d{2}$/.test(t)) {
+        add('fix', 7, 'Anno abbreviato ' + t + ': scrivilo per esteso (es. 1861).');
+        res.push(t); alt.push(t); continue;
+      }
+      if (lw === 'detto' || lw === 'detta') add('fix', 4, 'Pseudonimo: usa o il nome reale o lo pseudonimo, senza "detto".');
+      if (lw === 'prolungamento' || lw === 'tronco') add('fix', 9, '"' + t + '" non fa parte del nome: un prolungamento prende il nome della strada esistente.');
+
+      var acc = fixAccent(t);
+      if (acc) {
+        add('fix', 2, '"' + t + '": l\'accento si scrive con la lettera accentata (' + titleToken(acc, i) + ').');
+        t = acc;
+      }
+      if (allCaps || lowerStart) t = titleToken(t, i);
+      else if (i === 1 && LOWER.indexOf(lw) >= 0 && t !== lw) {
+        add('fix', 2, 'Preposizione dopo la specie in minuscolo: "' + lw + '".');
+        t = lw;
+      }
+      else if (i > 0 && t === lw && (TITLES.indexOf(lw) >= 0 || ['san','santo','santa','beato','beata'].indexOf(lw) >= 0 || /^sant['’]/.test(lw))) {
+        var capT = titleToken(t, 1).replace(/^./, function (c) { return c.toUpperCase(); });
+        add('fix', 5, 'Titoli e appellativi vogliono la maiuscola di rispetto: ' + capT + '.');
+        t = capT;
+      }
+      res.push(t); alt.push(t);
+    }
+
+    /* ---- Santi e Madonna (punto 6) ---- */
+    function setBoth(k, v) { res[k] = v; alt[k] = v; }
+    function mergeBoth(k, v) { res.splice(k, 2, v); alt.splice(k, 2, v); }
+    for (var k = 1; k < res.length; k++) {
+      var w = res[k], nx = res[k + 1], wl = w.toLowerCase(), nm = null;
+      var mA = w.match(/^sant['’](.+)$/i);
+      if (mA) nm = mA[1];
+      else if (['s.', 's', 'san', 'santo', 'santa', 'sant'].indexOf(wl) >= 0 && isCapWord(nx)) nm = nx;
+      if (!nm) continue;
+      var want = saintFor(nm);
+      var canon = w.charAt(0).toUpperCase() + wl.slice(1);
+      if (wl === 's.' || wl === 's') {
+        add('check', 6, '"' + w + '" sciolto in "' + want + '" in base al nome che segue (' + nm + '): verifica sul cartello o nello stradario.');
+        if (want === "Sant'") mergeBoth(k, "Sant'" + nm); else setBoth(k, want);
+      } else if (mA) {
+        if (want !== "Sant'") {
+          add('fix', 6, 'Sant\' si usa solo davanti a vocale: ' + want + ' ' + nm + '.');
+          res.splice(k, 1, want, nm); alt.splice(k, 1, want, nm);
+        } else if (/’/.test(w)) setBoth(k, "Sant'" + nm);
+      } else if (wl === 'sant') {
+        add('fix', 6, want === "Sant'" ? 'Manca l\'apostrofo: Sant\'' + nm + '.' : 'Sant\' si usa solo davanti a vocale: ' + want + ' ' + nm + '.');
+        if (want === "Sant'") mergeBoth(k, "Sant'" + nm); else setBoth(k, want);
+      } else if (want === "Sant'") {
+        add('fix', 6, 'Davanti a vocale si elide: ' + canon + ' ' + nm + ' → Sant\'' + nm + '.');
+        mergeBoth(k, "Sant'" + nm);
+      } else if (canon === 'San' && want === 'Santo') {
+        add('fix', 6, 'Davanti a s + consonante si scrive Santo: Santo ' + nm + '.');
+        setBoth(k, 'Santo');
+      } else if (canon === 'Santo' && want === 'San' && !/^z/i.test(nm)) {
+        add('fix', 6, 'Santo si usa davanti a s + consonante (Santo Stefano); qui si scrive San ' + nm + '.');
+        setBoth(k, 'San');
+      } else if (canon !== 'Santa' && want === 'Santa') {
+        add('check', 6, nm + ' sembra un nome femminile: forse Santa ' + nm + '?');
+      } else if (canon === 'Santa' && want !== 'Santa') {
+        add('check', 6, nm + ' sembra un nome maschile: forse ' + want + ' ' + nm + '?');
+      }
+      var nIdx = /^sant'/i.test(res[k]) ? k : k + 1;
+      if (AMBIG[nm.toLowerCase()] && nIdx === res.length - 1)
+        add('check', 6, nm.toLowerCase() === 'maria'
+          ? 'Santa Maria da sola è generica: aggiungi il titolo mariano (' + AMBIG.maria + ').'
+          : res.slice(k, nIdx + 1).join(' ') + ' è ambiguo: specifica quale santo (' + AMBIG[nm.toLowerCase()] + ').');
+    }
+    var mad = res.map(function (x) { return x.toLowerCase(); }).lastIndexOf('madonna');
+    if (mad > 0 && mad === res.length - 1)
+      add('check', 6, '"Madonna" da sola è generica: specifica il titolo (Madonna delle Grazie, del Pozzo, del Riposo…).');
+
+    /* ---- Persone e titoli (punti 4-5) ---- */
+    var low = res.map(function (x) { return x.toLowerCase(); });
+    var dugFirst = DUG.indexOf(low[0]) >= 0;
+    var p = 1;
+    while (p < res.length && TITLES.indexOf(low[p]) >= 0) p++;
+    if (p - 1 >= 2) add('check', 5, 'Più titoli di fila (' + res.slice(1, p).join(' ') + '): Istat ne tiene uno solo, il più adatto.');
+    for (var q = 2; p - 1 < 2 && q < res.length - 1; q++) {
+      if (TITLES.indexOf(low[q]) >= 0 && TITLES.indexOf(low[q - 1]) >= 0 && q - 1 > 1) {
+        add('check', 5, 'Più titoli di fila (' + res[q - 1] + ' ' + res[q] + '): Istat ne tiene uno solo.'); break;
+      }
+    }
+    if (res.length >= 3 && TITLES.indexOf(low[res.length - 1]) >= 0 && low[res.length - 1] !== 'madre')
+      add('check', 5, 'Il titolo "' + res[res.length - 1] + '" va prima del nome (es. Via Don Giovanni Minzoni).');
+    if (NOBLE.indexOf(low[1]) >= 0 && isCapWord(res[2]) && low.slice(3).some(function (x) { return x === 'di' || /^d'/.test(x); }))
+      add('check', 5, 'Titolo nobiliare seguito dal territorio: va dopo nome e cognome (es. Via Camillo Benso Conte di Cavour).');
+    if (dugFirst && p === res.length - 1 && FAMOUS[low[p]])
+      add('check', 4, 'Solo il cognome: Istat chiede nome e cognome. Probabilmente ' + res.slice(0, p).join(' ') + ' ' + FAMOUS[low[p]] + ': verifica nello stradario.');
+    if (dugFirst && res.length === 4 && low[2] === 'e' && isCapWord(res[1]) && isCapWord(res[3]))
+      add('check', 4, 'Se sono due persone, scrivi nome e cognome di entrambe (es. Via Giovanni Falcone e Paolo Borsellino).');
+    var odDug = ['strada', 'autostrada', 'circonvallazione', 'litoranea', 'raccordo', 'tangenziale'].indexOf(low[0]) >= 0;
+    res.forEach(function (x) {
+      if (/^[A-ZÀ-Ý][a-zà-ÿ']+-[A-ZÀ-Ý][a-zà-ÿ']+$/.test(x) && !odDug)
+        add('check', 4, '"' + x + '": per due persone usa "e" e i nomi completi; il trattino va solo in un doppio cognome attestato.');
+    });
+    var fr = low.indexOf('fratelli') >= 0 ? low.indexOf('fratelli') : low.indexOf('sorelle');
+    if (fr > 0 && low.slice(fr + 1).indexOf('e') >= 0 && res.length - fr - 1 >= 3)
+      add('check', 5, 'Con "' + res[fr] + '" bastano sostantivo e cognome: ' + res.slice(0, fr + 1).join(' ') + ' ' + res[res.length - 1] + '.');
+
+    if (initials.length) add('check', 4, 'Iniziali puntate (' + initials.join(' ') + '): scrivi il nome completo della persona, come da stradario.');
+    if (unknownDots.length) add('check', 3, 'Punti in "' + unknownDots.join(' ') + '": probabile abbreviazione da sciogliere.');
+    var PART = ['de', 'de\'', 'del', 'della', 'dello', 'dei', 'degli', 'delle', 'dal', 'dalla', 'di', 'da'];
+    if (allCaps && res.some(function (w, k) { return k > 1 && PART.indexOf(w) >= 0; }))
+      add('check', 4, 'Dopo la conversione, controlla le particelle dei cognomi: minuscole prima del XIX secolo (della Francesca), maiuscole dopo (Dalla Chiesa, De Nicola).');
+
+    var first = (res[0] || '').toLowerCase();
+    if (first && DUG.indexOf(first) < 0 && first.indexOf('lung') !== 0)
+      add('info', 2, '"' + res[0] + '" non è una specie del dizionario Istat (Via, Piazza, Strada…). Va bene se è il nome ufficiale, ma controlla.');
+    if ((first === 'via' || first === 'strada') && res[1] && SECOND_DUG.indexOf(res[1].toLowerCase()) >= 0)
+      add('info', 1, 'Due specie di fila: Istat le evita nelle nuove intitolazioni, ma in OSM lascia il nome ufficiale così com\'è.');
+
+    /* ---- Termine da cercare su Wikidata per name:etymology ---- */
+    out.etymTerm = null;
+    if (dugFirst && res.length > 1) {
+      var et = 1;
+      while (et < res.length - 1 && LOWER.indexOf(low[et]) >= 0) et++;
+      while (et < res.length - 1 && TITLES.indexOf(low[et]) >= 0) et++;
+      var rest = alt.slice(et);
+      rest[0] = rest[0].replace(/^(dell|dall|all|nell|sull|d|l)['’]/i, '');
+      var only = rest.length === 1 && FAMOUS[rest[0].toLowerCase()];
+      out.etymTerm = only ? only.replace(/\s*\(.*\)$/, '') : rest.join(' ');
+    }
+
+    out.name = res.join(' ');
+    if (altUsed) out.tags.unshift('alt_name=' + alt.join(' '));
+    if (oldName) {
+      var oTok = oldName.split(' ');
+      var oCaps = oldName === oldName.toUpperCase();
+      out.tags.unshift('old_name=' + oTok.map(function (w, k) { var a = fixAccent(w) || w; return oCaps || k === 0 ? titleToken(a, k) : a; }).join(' '));
+    }
+    out.tags.unshift('name=' + out.name);
+    out.istat = toIstat(out.name);
+    return out;
+  }
+
+  /* ---- Ricerca su Wikidata (SPARQL) ----
+     La pagina non può contattare altri siti: le query passano dal browser integrato
+     dell'app desktop di Claude (server host:claude_browser). Regole per non pesare
+     sul servizio: solo su clic, una query alla volta, almeno 5 s tra due query,
+     risultati in cache per 7 giorni. */
+  var WD_GAP = 5000, WD_TTL = 7 * 24 * 3600 * 1000, wdLast = 0, wdBusy = false, wdTab = null, wdMem = {};
+  var mcpP = (window.claude && window.claude.use) ? window.claude.use('mcp').catch(function () { return null; }) : Promise.resolve(null);
+  function saintless(t) { return t.replace(/^(San|Santo|Santa|Beato|Beata)\s+/i, '').replace(/^Sant['’]/i, ''); }
+  function sparqlFor(term) {
+    var lit = term.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    return 'SELECT ?item ?itemLabel ?itemDescription ?nascita ?morte WHERE {\n' +
+      '  SERVICE wikibase:mwapi {\n' +
+      '    bd:serviceParam wikibase:endpoint "www.wikidata.org"; wikibase:api "EntitySearch";\n' +
+      '      mwapi:search "' + lit + '"; mwapi:language "it"; wikibase:limit 20 .\n' +
+      '    ?item wikibase:apiOutputItem mwapi:item .\n' +
+      '    ?ord wikibase:apiOrdinal true .\n' +
+      '  }\n' +
+      '  ?item wdt:P31 wd:Q5 .\n' +
+      '  OPTIONAL { ?item wdt:P569 ?nascita . }\n' +
+      '  OPTIONAL { ?item wdt:P570 ?morte . }\n' +
+      '  SERVICE wikibase:label { bd:serviceParam wikibase:language "it,en" . }\n' +
+      '} ORDER BY ?ord LIMIT 8';
+  }
+  function textOf(res) {
+    return ((res && res.content) || []).map(function (b) { return b.type === 'text' ? b.text : ''; }).join('\n');
+  }
+  function parseCands(pageText) {
+    var a = pageText.indexOf('{'), b = pageText.lastIndexOf('}');
+    if (a < 0 || b < a) throw { code: 'bad_answer' };
+    var data = JSON.parse(pageText.slice(a, b + 1));
+    var seen = {}, out = [];
+    ((data.results && data.results.bindings) || []).forEach(function (row) {
+      var q = (row.item.value.match(/Q\d+$/) || [])[0];
+      if (!q || seen[q]) return;
+      seen[q] = true;
+      var yr = function (v) { var m = v && v.value.match(/^(-?\d{1,4})-/); return m ? String(parseInt(m[1], 10)) : ''; };
+      out.push({ q: q, label: row.itemLabel ? row.itemLabel.value : q, desc: row.itemDescription ? row.itemDescription.value : '', born: yr(row.nascita), died: yr(row.morte) });
+    });
+    return out;
+  }
+  function cacheGet(term) {
+    var k = term.toLowerCase(), hit = wdMem[k];
+    if (!hit) { try { hit = JSON.parse(localStorage.getItem('wd:' + k) || 'null'); } catch (e) { hit = null; } }
+    return hit && Date.now() - hit.at < WD_TTL ? hit.cands : null;
+  }
+  function cachePut(term, cands) {
+    var k = term.toLowerCase(), v = { at: Date.now(), cands: cands };
+    wdMem[k] = v;
+    try { localStorage.setItem('wd:' + k, JSON.stringify(v)); } catch (e) {}
+  }
+  function wikidataPeople(term) {
+    var cached = cacheGet(term);
+    if (cached) return Promise.resolve(cached);
+    if (wdBusy) return Promise.reject({ code: 'busy' });
+    var wait = WD_GAP - (Date.now() - wdLast);
+    if (wait > 0) return Promise.reject({ code: 'too_soon', wait: wait });
+    wdBusy = true; wdLast = Date.now();
+    var url = 'https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(sparqlFor(term));
+    var B = 'host:claude_browser', mcp;
+    return mcpP.then(function (m) {
+      if (!m) throw { code: 'no_host' };
+      mcp = m;
+      var open = function () {
+        return mcp.callTool(B, 'preview_start', { url: url }, { cache: false }).then(function (r) {
+          var t = textOf(r).match(/"tabId"\s*:\s*"([^"]+)"/);
+          wdTab = t ? t[1] : null;
+        });
+      };
+      if (!wdTab) return open();
+      return mcp.callTool(B, 'navigate', { url: url, tabId: wdTab }, { cache: false })
+        .catch(function (e) { if (e && e.code === 'tool_error') { wdTab = null; return open(); } throw e; });
+    }).then(function () {
+      var args = { max_chars: 50000 };
+      if (wdTab) args.tabId = wdTab;
+      return mcp.callTool(B, 'get_page_text', args, { cache: false });
+    }).then(function (r) {
+      var cands = parseCands(textOf(r));
+      cachePut(term, cands);
+      return cands;
+    }).then(function (c) { wdBusy = false; return c; }, function (e) { wdBusy = false; throw e; });
+  }
+  function wdError(e) {
+    var code = e && e.code;
+    if (code === 'cancelled') return 'Ricerca su Wikidata annullata.';
+    if (code === 'approval_required' || code === 'consent_required') return 'Per cercare su Wikidata serve la tua approvazione all\'uso del browser dell\'app.';
+    if (code === 'not_in_manifest') return 'La ricerca su Wikidata è disattivata nei permessi di questa pagina.';
+    if (code === 'bad_answer' || e instanceof SyntaxError) return 'Wikidata ha risposto in un formato inatteso (forse è sovraccarico).';
+    return 'Ricerca su Wikidata non riuscita (' + (code || 'errore') + ').';
+  }
+  var NOHOST = ['no_host', 'server_not_connected', 'not_granted', 'capability_disabled', 'capability_removed'];
+
+  /* Stato dell'etimologia: sopravvive ai ridisegni fatti a ogni tasto. */
+  var ety = { term: null, cands: null, sel: null, status: '', err: null, manualQ: '' };
+  var etyTimer = null, curTags = [];
+  function etyLabel() {
+    if (!ety.sel || !ety.cands) return null;
+    for (var i = 0; i < ety.cands.length; i++) if (ety.cands[i].q === ety.sel) return ety.cands[i].label;
+    return null;
+  }
+  function tagsNow() {
+    var t = curTags.slice(), lb = etyLabel();
+    if (lb) t.push('name:etymology=' + lb, 'name:etymology:wikidata=' + ety.sel);
+    else if (ety.status === 'nohost' && ety.manualQ) t.push('name:etymology=' + ety.term, 'name:etymology:wikidata=' + ety.manualQ);
+    return t;
+  }
+  function paintTags() { var pre = document.getElementById('tags-out'); if (pre) pre.textContent = tagsNow().join('\n'); }
+  function etyTermFor(raw) {
+    if (!raw) return null;
+    var t = saintless(raw.trim());
+    return t && !/\d/.test(t) ? t : null;
+  }
+  function setEtyTerm(t) {
+    if (t === ety.term) return;
+    clearTimeout(etyTimer);
+    ety = { term: t, cands: null, sel: null, status: '', err: null, manualQ: '' };
+    if (!t) return;
+    var hit = cacheGet(t);
+    if (hit) { gotCands(t, hit); return; }
+    etyTimer = setTimeout(runEty, Math.max(1500, WD_GAP - (Date.now() - wdLast)));
+  }
+  function runEty() {
+    var term = ety.term;
+    if (!term) return;
+    if (wdBusy) { etyTimer = setTimeout(runEty, 1000); return; }
+    var wait = WD_GAP - (Date.now() - wdLast);
+    if (wait > 0) { etyTimer = setTimeout(runEty, wait); return; }
+    ety.status = 'searching';
+    wikidataPeople(term).then(function (c) { gotCands(term, c); }, function (e) {
+      if (term !== ety.term) return;
+      ety.status = NOHOST.indexOf(e && e.code) >= 0 ? 'nohost' : 'error';
+      ety.err = e; paintEty(); paintTags();
+    });
+  }
+  function gotCands(term, c) {
+    if (term !== ety.term) return;
+    ety.cands = c; ety.status = 'done';
+    var exact = c.filter(function (x) { return x.label.toLowerCase() === term.toLowerCase(); });
+    var pick = c.length === 1 ? c[0] : exact.length === 1 ? exact[0] : null;
+    /* Con un solo nome (Via Roma, Via Mazzini) non scelgo da solo: troppi omonimi. */
+    if (pick && term.split(/\s+/).length > 1) ety.sel = pick.q;
+    paintEty(); paintTags();
+  }
+  function paintEty() {
+    var box = document.getElementById('etym-row');
+    if (!box) return;
+    box.innerHTML = '';
+    if (ety.status === 'done' && ety.cands && ety.cands.length) {
+      var k = document.createElement('span'); k.className = 'k'; k.textContent = 'Chi ricorda il nome';
+      var list = document.createElement('ul'); list.className = 'cands';
+      ety.cands.forEach(function (c) {
+        var li = document.createElement('li');
+        if (c.q === ety.sel) li.className = 'sel';
+        var b = document.createElement('button'); b.type = 'button';
+        b.setAttribute('aria-pressed', c.q === ety.sel ? 'true' : 'false');
+        var years = c.born || c.died ? ' (' + (c.born || '?') + '–' + (c.died || '') + ')' : '';
+        b.innerHTML = '<strong></strong><span></span><code></code>';
+        b.querySelector('strong').textContent = c.label + years;
+        b.querySelector('span').textContent = c.desc || 'senza descrizione';
+        b.querySelector('code').textContent = c.q;
+        b.addEventListener('click', function () {
+          ety.sel = ety.sel === c.q ? null : c.q;
+          paintEty(); paintTags();
+        });
+        li.appendChild(b); list.appendChild(li);
+      });
+      var hint = document.createElement('p'); hint.className = 'disclaimer';
+      var lb = etyLabel();
+      hint.textContent = lb
+        ? 'Nei tag come name:etymology. Tocca di nuovo la persona selezionata per non usare l\'etimologia.'
+        : 'Nessuna etimologia nei tag. Scegli la persona solo se sei sicuro che sia quella della targa.';
+      box.appendChild(k); box.appendChild(list); box.appendChild(hint);
+    } else if (ety.status === 'error') {
+      var p = document.createElement('p'); p.className = 'disclaimer';
+      p.textContent = wdError(ety.err) + ' ';
+      var r = document.createElement('button'); r.type = 'button'; r.className = 'copy'; r.textContent = 'Riprova';
+      r.addEventListener('click', function () { ety.status = ''; paintEty(); runEty(); });
+      p.appendChild(r); box.appendChild(p);
+    } else if (ety.status === 'nohost') {
+      var k2 = document.createElement('span'); k2.className = 'k'; k2.textContent = 'Chi ricorda il nome';
+      var p2 = document.createElement('p'); p2.className = 'disclaimer';
+      p2.innerHTML = 'La ricerca automatica funziona solo nell\'app desktop di Claude. <a target="_blank" rel="noopener"></a> e incolla qui il codice Q, se sei sicuro che sia la persona della targa.';
+      var a = p2.querySelector('a');
+      a.href = 'https://www.wikidata.org/w/index.php?uselang=it&search=' + encodeURIComponent(ety.term);
+      a.textContent = 'Cerca "' + ety.term + '" su Wikidata ↗';
+      var q = document.createElement('input'); q.type = 'text'; q.placeholder = 'Q1234'; q.spellcheck = false;
+      q.setAttribute('aria-label', 'Codice Wikidata della persona'); q.value = ety.manualQ;
+      q.addEventListener('input', function () {
+        var m = q.value.match(/\b(Q[1-9]\d*)\b/i);
+        ety.manualQ = m ? m[1].toUpperCase() : '';
+        paintTags();
+      });
+      box.appendChild(k2); box.appendChild(p2); box.appendChild(q);
+    }
+  }
+
+  var input = document.getElementById('nome-input');
+  var result = document.getElementById('result');
+  var LABEL = { fix: 'Correggi', check: 'Verifica', info: 'Nota' };
+
+  function render() {
+    var r = analyze(input.value);
+    if (!r) { result.innerHTML = '<p class="disclaimer">Scrivi un nome per vedere il controllo.</p>'; return; }
+    var issues = r.issues.length ? r.issues.map(function (x) {
+      return '<li class="issue ' + x.level + '"><span class="pill">' + LABEL[x.level] + '</span><span>' + esc(x.text) +
+        ' <a href="#passo-' + x.step + '">punto ' + x.step + '</a></span></li>';
+    }).join('') : '<li class="issue okay"><span class="pill">Ok</span><span>Nessun problema evidente. Ripassa comunque i punti 4–6 se il nome riguarda persone o santi.</span></li>';
+    result.innerHTML =
+      '<div class="out-row"><span class="k">Proposta per OSM</span><div class="plate out-sign">' + esc(r.name) + '</div></div>' +
+      '<div class="out-row etym" id="etym-row"></div>' +
+      '<div class="out-row"><span class="k">Tag</span><pre class="tags-out" id="tags-out"></pre>' +
+      '<div><button type="button" class="copy" id="copy-btn">Copia i tag</button></div></div>' +
+      '<div class="out-row"><span class="k">Forma nello stradario Istat</span><span class="istat">' + esc(r.istat) + '</span></div>' +
+      '<div class="out-row"><span class="k">Cosa è cambiato</span><ul class="issues">' + issues + '</ul></div>';
+
+    curTags = r.tags;
+    setEtyTerm(etyTermFor(r.etymTerm));
+    paintEty(); paintTags();
+    var btn = document.getElementById('copy-btn');
+    btn.addEventListener('click', function () {
+      var text = tagsNow().join('\n');
+      var done = function () { btn.textContent = 'Tag copiati'; };
+      var fallback = function () {
+        var pre = result.querySelector('.tags-out');
+        var range = document.createRange(); range.selectNodeContents(pre);
+        var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+        btn.textContent = 'Testo selezionato: copia con Ctrl+C';
+      };
+      try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+    });
+  }
+
+  input.addEventListener('input', render);
+  document.getElementById('check-form').addEventListener('submit', function (e) { e.preventDefault(); render(); });
+  document.getElementById('samples').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    input.value = b.textContent; render(); input.focus();
+  });
+  render();
+})();
+</script>
+
+</body></html>
